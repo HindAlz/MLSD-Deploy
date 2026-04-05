@@ -7,6 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
 COPY feature_schema.py .
+COPY profile_fetcher.py .
+COPY feature_extractor.py .
 COPY model.pkl .
 
 ENV PORT=8080
