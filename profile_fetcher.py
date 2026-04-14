@@ -29,12 +29,11 @@ def fetch_x_profile_from_url(url: str) -> dict:
     username = extract_x_username(url)
 
     scraper = sntwitter.TwitterUserScraper(username)
-    user = next(scraper.get_items(), None)
+    user = scraper.entity
 
     if user is None:
         raise ValueError("Profile not found or could not be fetched")
 
-    # Map scraped fields into your model schema
     return {
         "username_raw": getattr(user, "username", "") or "",
         "fullname_raw": getattr(user, "displayname", "") or "",

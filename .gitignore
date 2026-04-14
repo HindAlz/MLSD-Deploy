@@ -6,4 +6,6 @@ __pycache__/
 .DS_Store
 key.json
 .env
-venv/
+.venv/Lib/
+.venv/Scripts/
+.venv/

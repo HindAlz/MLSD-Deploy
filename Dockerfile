@@ -9,7 +9,7 @@ COPY app.py .
 COPY feature_schema.py .
 COPY profile_fetcher.py .
 COPY feature_extractor.py .
-COPY model.pkl .
+COPY autogluon_model ./autogluon_model
 
 ENV PORT=8080
 EXPOSE 8080

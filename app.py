@@ -1,39 +1,45 @@
 import pandas as pd
 from flask import Flask, request, jsonify
-import joblib
+from autogluon.tabular import TabularPredictor
 
 from feature_schema import validate_manual_features
 from profile_fetcher import fetch_x_profile_from_url
 from feature_extractor import extract_features_from_x_profile
 
 app = Flask(__name__)
-MODEL = joblib.load("model.pkl")
 
+PREDICTOR = TabularPredictor.load(require_py_version_match=False, path="autogluon_model")
+THRESHOLD = 0.11
 
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
-
 
 def predict_from_features(features: dict):
     validated = validate_manual_features(features)
     df_input = pd.DataFrame([validated])
 
     for col in ["profile pic", "name==username", "external URL", "private"]:
-        df_input[col] = df_input[col].astype(str)
+        if col in df_input.columns:
+            df_input[col] = df_input[col].astype(str)
 
-    pred = int(MODEL.predict(df_input)[0])
+    prob_df = PREDICTOR.predict_proba(df_input)
 
-    prob_fake = None
-    if hasattr(MODEL, "predict_proba"):
-        prob_fake = float(MODEL.predict_proba(df_input)[0][1])
+    if 1 in prob_df.columns:
+        prob_fake = float(prob_df[1].iloc[0])
+    elif "1" in prob_df.columns:
+        prob_fake = float(prob_df["1"].iloc[0])
+    else:
+        prob_fake = float(prob_df.iloc[0, -1])
+
+    pred = int(prob_fake >= THRESHOLD)
 
     return {
         "features": validated,
         "prediction": "fake" if pred == 1 else "not fake",
         "probability_fake": prob_fake,
+        "threshold": THRESHOLD,
     }
-
 
 @app.route("/predict", methods=["POST"])
 def predict():
