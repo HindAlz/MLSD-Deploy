@@ -3,8 +3,6 @@ from flask import Flask, request, jsonify
 from autogluon.tabular import TabularPredictor
 
 from feature_schema import validate_manual_features
-from profile_fetcher import fetch_x_profile_from_url
-from feature_extractor import extract_features_from_x_profile
 
 app = Flask(__name__)
 
@@ -52,23 +50,7 @@ def predict():
             result = predict_from_features(features)
             return jsonify({"mode": "manual", **result}), 200
 
-        if mode == "url":
-            url = data.get("url")
-            if not url:
-                return jsonify({"error": "Missing 'url'"}), 400
-
-            raw_profile = fetch_x_profile_from_url(url)
-            features = extract_features_from_x_profile(raw_profile)
-            result = predict_from_features(features)
-
-            return jsonify({
-                "mode": "url",
-                "platform": "x",
-                "url": url,
-                **result
-            }), 200
-
-        return jsonify({"error": "Invalid mode. Use 'manual' or 'url'."}), 400
+        return jsonify({"error": "Invalid mode. Use 'manual'"}), 400
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400

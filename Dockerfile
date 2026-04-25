@@ -10,9 +10,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
-COPY feature_extractor.py .
 COPY feature_schema.py .
-COPY profile_fetcher.py .
 COPY autogluon_model ./autogluon_model
 
 EXPOSE 8080
