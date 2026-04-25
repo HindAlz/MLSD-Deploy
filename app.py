@@ -42,15 +42,14 @@ def predict_from_features(features: dict):
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.get_json(silent=True) or {}
-    mode = data.get("mode")
 
     try:
-        if mode == "manual":
-            features = data.get("features", {})
-            result = predict_from_features(features)
-            return jsonify({"mode": "manual", **result}), 200
+        features = data.get("features")
+        if not features:
+            return jsonify({"error": "Missing 'features' in request"}), 400
 
-        return jsonify({"error": "Invalid mode. Use 'manual'"}), 400
+        result = predict_from_features(features)
+        return jsonify(result), 200
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
